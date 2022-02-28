@@ -6,19 +6,23 @@ export interface SelectItem {
 export interface FormPayload {
     category: string;
     iconName: string;
-    iconSize?: number;
     commitType: string;
     commitMessage: string;
     pullRequestHeader: string;
 }
 
 export interface IconPayload {
-    size: number;
+    size?: number;
+    svg?: string;
 }
 
-export interface FilesPayloadRequest
-    extends Omit<FormPayload, 'iconSize'>,
-        Omit<FilesPayloadResponse, 'iconAsset' | 'iconComponent'> {}
+export interface TokenPayloadRequest {
+    token: string;
+}
+
+export type TokenPayloadResponse = TokenPayloadRequest;
+
+export interface FilesPayloadRequest extends FormPayload, Omit<FilesPayloadResponse, 'iconAsset' | 'iconComponent'> {}
 
 export interface FilesPayloadResponse {
     iconAsset: string;
@@ -27,7 +31,14 @@ export interface FilesPayloadResponse {
     iconSource: string;
 }
 
-export type MessageType = 'export-start' | 'create-pr-done' | 'cancel' | 'update-size' | 'export-done';
+export type MessageType =
+    | 'export-start'
+    | 'create-pr-done'
+    | 'cancel'
+    | 'update-size'
+    | 'export-done'
+    | 'set-token'
+    | 'token';
 
 export interface UIMessage<T> {
     type: MessageType;

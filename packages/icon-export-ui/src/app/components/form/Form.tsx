@@ -1,15 +1,7 @@
-import React, { ChangeEvent, FC, FormEvent, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, FC, FormEvent, useCallback, useState } from 'react';
 import { ParagraphText1, TextField, Select } from '@salutejs/plasma-web';
 
-import type {
-    FilesPayloadResponse,
-    FilesPayloadRequest,
-    FormPayload,
-    IconPayload,
-    PluginMessage,
-    SelectItem,
-} from '../../../types';
-import { getFilesSourceFromGH } from '../../controllers/githubFilesFetcher';
+import type { FormPayload, IconPayload, SelectItem } from '../../../types';
 
 import { StyledCommitMessage, StyledForm, StyledInput } from './Form.style';
 
@@ -35,35 +27,30 @@ const commitTypes: SelectItem[] = [
 
 const defaultState = {
     category: 'navigation',
-    iconSize: 16,
     iconName: 'NameTest',
     commitType: 'feat',
     commitMessage: 'Add icon `IconNameTest`',
     pullRequestHeader: 'feat(plasma-icons): Add icon `IconNameTest`',
 };
 
+interface FormProps {
+    onSubmit?: (data: FormPayload) => Promise<void>;
+    iconMetaData: IconPayload;
+}
+
 /**
  * Элементы формы для ввода данных.
  */
-export const Form: FC = () => {
+export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconMetaData }) => {
     const [state, setState] = useState<FormPayload>(defaultState);
 
-    const onSubmit = useCallback(
+    const onSubmitForm = useCallback(
         async (event: FormEvent) => {
             event.preventDefault();
 
-            const [iconSource, indexSource] = await getFilesSourceFromGH('salute-developers', 'plasma', [
-                'packages/plasma-icons/src/Icon.tsx',
-                'packages/plasma-icons/src/index.ts',
-            ]);
-
-            const payload: PluginMessage<FilesPayloadRequest> = {
-                pluginMessage: { type: 'export-start', payload: { ...state, iconSource, indexSource } },
-            };
-            // eslint-disable-next-line no-restricted-globals
-            parent.postMessage(payload, '*');
+            onSubmit(state);
         },
-        [state],
+        [onSubmit, state],
     );
 
     const onChangeSelect = useCallback(
@@ -85,39 +72,15 @@ export const Form: FC = () => {
         }));
     }, []);
 
-    useEffect(() => {
-        const onMessage = async (event: MessageEvent<PluginMessage<FilesPayloadResponse | IconPayload>>) => {
-            const { type, payload } = event.data.pluginMessage;
-
-            if (type === 'update-size' && 'size' in payload) {
-                setState((prevState) => ({
-                    ...prevState,
-                    iconSize: payload.size,
-                }));
-            }
-
-            if (type === 'export-done' && !('size' in payload)) {
-                // eslint-disable-next-line no-console
-                console.log('payload', payload);
-            }
-        };
-
-        window.addEventListener('message', onMessage);
-
-        return () => {
-            window.removeEventListener('message', onMessage);
-        };
-    }, []);
-
     return (
-        <StyledForm id="form" onSubmit={onSubmit}>
+        <StyledForm id="form" onSubmit={onSubmitForm}>
             <StyledInput>
                 <ParagraphText1>Repository</ParagraphText1>
                 <TextField readOnly value="salute-developers/plasma" />
             </StyledInput>
             <StyledInput>
                 <ParagraphText1>Icon size</ParagraphText1>
-                <TextField readOnly value={state.iconSize} />
+                <TextField readOnly value={iconMetaData.size} />
             </StyledInput>
             <StyledInput>
                 <ParagraphText1>Icon name</ParagraphText1>
