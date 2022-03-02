@@ -1,6 +1,6 @@
 {
   "name": "@salutejs/icon-export-ui",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Icon exporter figma plugin",
   "main": "code.js",
   "author": "Salute Frontend Team <salute.developers@gmail.com>",
