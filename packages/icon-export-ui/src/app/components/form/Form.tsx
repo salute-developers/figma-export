@@ -30,7 +30,7 @@ const defaultState = {
     iconName: 'NameTest',
     commitType: 'feat',
     commitMessage: 'Add icon `IconNameTest`',
-    pullRequestHeader: 'feat(plasma-icons): Add icon `IconNameTest`',
+    pullRequestHeader: 'Add icon `IconNameTest`',
 };
 
 interface FormProps {

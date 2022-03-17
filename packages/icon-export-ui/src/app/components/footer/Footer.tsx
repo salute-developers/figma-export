@@ -17,7 +17,7 @@ export const Footer: FC = () => {
         <StyledFooter>
             <StyledButton onClick={onCancel}>Cancel</StyledButton>
             <StyledButton id="create" view="primary" form="form" type="submit">
-                Create
+                Create PR
             </StyledButton>
         </StyledFooter>
     );
