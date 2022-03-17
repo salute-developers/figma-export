@@ -8,3 +8,7 @@ export const insertString = (source: string, index: number, add: string) =>
     source.substring(0, index) + add + source.substring(index, source.length);
 
 export const camelize = (source: string) => source.replace(/-./g, (x) => x[1].toUpperCase());
+
+export const sleep = async (seconds: number) => new Promise((r) => setTimeout(r, seconds));
+
+export const getSalt = () => Math.random().toString(32).split('.')[1];

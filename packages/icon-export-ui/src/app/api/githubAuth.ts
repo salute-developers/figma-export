@@ -1,4 +1,4 @@
-export const sleep = async (seconds: number) => new Promise((r) => setTimeout(r, seconds));
+import { sleep } from '../../utils';
 
 interface TokenResponse {
     token: string;

@@ -48,3 +48,11 @@ export interface UIMessage<T> {
 export interface PluginMessage<T> {
     pluginMessage: UIMessage<T>;
 }
+
+export interface GitCreateBlobResponse {
+    url?: string;
+    sha?: string | null;
+    path?: string;
+    mode?: '100644' | '100755' | '040000' | '160000' | '120000';
+    type?: 'tree' | 'blob' | 'commit';
+}
