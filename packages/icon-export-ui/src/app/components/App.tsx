@@ -42,7 +42,7 @@ const App = () => {
         size: 16,
     });
     const [step, createGithubPR] = useRunGithubPRProcess({
-        owner: 'neretin-trike', // ToDo: поменять на sberdevices
+        owner: 'salute-developers',
         repo: 'plasma',
         branchName: `icon-export-${getSalt()}`,
     });
@@ -100,7 +100,7 @@ const App = () => {
     const onSubmit = useCallback(
         async (data: FormPayload) => {
             const [iconSource, indexSource] = await getFilesSource(
-                'neretin-trike', // ToDo: поменять на sberdevices
+                'salute-developers',
                 'plasma',
                 [filesPath().IconSource, filesPath().IndexSource],
                 token,

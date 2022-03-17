@@ -29,7 +29,8 @@ export const ${name}: React.FC<IconProps> = (props) => (
     <svg width="100%" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
         ${svgContent}
     </svg>
-);`;
+);
+`;
 };
 
 /**

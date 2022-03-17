@@ -3,10 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { getLongPollToken } from '../api/githubAuth';
 
-// данные значения временные, пока не будет заведен
-// реальный clientID и поднят сервис авторизации
-// const APPLICATION_CLIENT_ID = 'ee7bc69bd8493cfa9715'; // ToDo: Remove after task done
-const APPLICATION_CLIENT_ID = 'a088429392f35252cbc7'; // prod
+const APPLICATION_CLIENT_ID = 'a088429392f35252cbc7';
 const AUTH_SERVER_URL = 'https://github-auth.prom.app.sberdevices.ru';
 
 const GITHUB_AUTH_API_URL = 'https://github.com/login/oauth/authorize';
