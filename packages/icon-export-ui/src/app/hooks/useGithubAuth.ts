@@ -1,12 +1,13 @@
 import { useCallback, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 
-import { getLongPollToken } from '../api/getLongPollToken';
+import { getLongPollToken } from '../api/githubAuth';
 
 // данные значения временные, пока не будет заведен
 // реальный clientID и поднят сервис авторизации
-const APPLICATION_CLIENT_ID = 'ee7bc69bd8493cfa9715';
-const AUTH_SERVER_URL = 'http://localhost:3000';
+// const APPLICATION_CLIENT_ID = 'ee7bc69bd8493cfa9715'; // ToDo: Remove after task done
+const APPLICATION_CLIENT_ID = 'a088429392f35252cbc7'; // prod
+const AUTH_SERVER_URL = 'https://github-auth.prom.app.sberdevices.ru';
 
 const GITHUB_AUTH_API_URL = 'https://github.com/login/oauth/authorize';
 const FETCH_DELAY = 1_500;
@@ -25,7 +26,9 @@ export const useGithubAuth = () => {
     const onGetToken = useCallback(() => {
         const pluginClientId = uuid();
         const redirectUri = `${AUTH_SERVER_URL}/auth/${pluginClientId}`;
-        window.open(`${GITHUB_AUTH_API_URL}?client_id=${APPLICATION_CLIENT_ID}&redirect_uri=${redirectUri}`);
+        window.open(
+            `${GITHUB_AUTH_API_URL}?client_id=${APPLICATION_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=public_repo`,
+        );
 
         const fetchData = async () => {
             const response = await getLongPollToken(`${AUTH_SERVER_URL}/token`, pluginClientId, FETCH_DELAY);
