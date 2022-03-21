@@ -1,9 +1,10 @@
 import React, { ChangeEvent, FC, FormEvent, useCallback, useState } from 'react';
-import { ParagraphText1, TextField, Select } from '@salutejs/plasma-web';
+import { TextField, Select } from '@salutejs/plasma-web';
 
 import type { FormPayload, IconPayload, SelectItem } from '../../../types';
+import { Input } from '../input/Input';
 
-import { StyledCommitMessage, StyledForm, StyledInput } from './Form.style';
+import { StyledCommitMessage, StyledForm } from './Form.style';
 
 const categories: SelectItem[] = [
     { value: 'navigation', label: 'Navigation' },
@@ -74,33 +75,31 @@ export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconMetaData }) => {
 
     return (
         <StyledForm id="form" onSubmit={onSubmitForm}>
-            <StyledInput>
-                <ParagraphText1>Repository</ParagraphText1>
-                <TextField readOnly value="salute-developers/plasma" />
-            </StyledInput>
-            <StyledInput>
-                <ParagraphText1>Icon size</ParagraphText1>
-                <TextField readOnly value={iconMetaData.size} />
-            </StyledInput>
-            <StyledInput>
-                <ParagraphText1>Icon name</ParagraphText1>
-                <TextField name="iconName" value={state.iconName} onChange={onChangeTextField} />
-            </StyledInput>
-            <StyledInput>
-                <ParagraphText1>Category</ParagraphText1>
-                <Select value={state.category} onChange={onChangeSelect('category')} items={categories} />
-            </StyledInput>
-            <StyledInput>
-                <ParagraphText1>Commit message</ParagraphText1>
-                <StyledCommitMessage>
-                    <Select value={state.commitType} onChange={onChangeSelect('commitType')} items={commitTypes} />
-                    <TextField name="commitMessage" value={state.commitMessage} onChange={onChangeTextField} />
-                </StyledCommitMessage>
-            </StyledInput>
-            <StyledInput>
-                <ParagraphText1>Pull Request header</ParagraphText1>
-                <TextField name="pullRequestHeader" value={state.pullRequestHeader} onChange={onChangeTextField} />
-            </StyledInput>
+            <Input label="Repository" content={<TextField readOnly value="salute-developers/plasma" />} />
+            <Input label="Icon size" content={<TextField readOnly value={iconMetaData.size} />} />
+            <Input
+                label="Icon name"
+                content={<TextField name="iconName" value={state.iconName} onChange={onChangeTextField} />}
+            />
+            <Input
+                label="Category"
+                content={<Select value={state.category} onChange={onChangeSelect('category')} items={categories} />}
+            />
+            <Input
+                label="Commit message"
+                content={
+                    <StyledCommitMessage>
+                        <Select value={state.commitType} onChange={onChangeSelect('commitType')} items={commitTypes} />
+                        <TextField name="commitMessage" value={state.commitMessage} onChange={onChangeTextField} />
+                    </StyledCommitMessage>
+                }
+            />
+            <Input
+                label="Pull Request header"
+                content={
+                    <TextField name="pullRequestHeader" value={state.pullRequestHeader} onChange={onChangeTextField} />
+                }
+            />
         </StyledForm>
     );
 };

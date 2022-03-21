@@ -5,10 +5,6 @@ export const StyledForm = styled.form`
     margin-bottom: 24px;
 `;
 
-export const StyledInput = styled.div`
-    margin: 12px 0;
-`;
-
 export const StyledCommitMessage = styled.div`
     display: flex;
 
