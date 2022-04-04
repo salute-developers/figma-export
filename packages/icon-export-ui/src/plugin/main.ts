@@ -1,34 +1,43 @@
-import { getIconAsset, getIconComponent, getIconSource, getIndexSource } from '../source';
-import type {
-    FilesPayloadResponse,
-    FilesPayloadRequest,
-    UIMessage,
-    IconPayload,
-    TokenPayloadRequest,
-    TokenPayloadResponse,
-} from '../types';
+import { getExportSvg } from '../source/iconAsset';
+import type { UIMessage, IconPayload, TokenPayloadResponse, TokenPayloadRequest } from '../types';
+import { camelize, upperFirstLetter } from '../utils';
 
-const selectionNode = figma.currentPage.selection[0];
+const selectionNode = figma.currentPage.selection;
 
 const defaultSetting = {
     title: 'Icon exporter plugin',
-    height: 638,
-    width: 372,
+    height: 410,
+    width: 700,
 };
 
-const sendMetaDataInfo = (selection: SceneNode) => {
-    const { width, height } = selection;
+const getNormalizedName = (name: string) => {
+    const secondPart = camelize(name).split('/')[1] || camelize(name);
+    const withoutPrefix = secondPart
+        .trim()
+        .replace(/^(\s*)[a-zA-Z_]+(\d\d)/g, '')
+        .replace(/\s/g, '');
+    return upperFirstLetter(withoutPrefix);
+};
 
-    const supportSizes = [16, 24, 36, 48, 56, 64];
+const sendMetaDataInfo = async (selections: readonly SceneNode[]) => {
+    const iconsMetaData = await Promise.all(
+        selections.map(async (selection) => {
+            const { width, name } = selection;
 
-    if (width !== height || !supportSizes.includes(width)) {
-        figma.closePlugin(`Please select icon with correct size: ${supportSizes}. Current size: ${width}x${height}`);
-        return;
-    }
+            const normalizedName = getNormalizedName(name);
+            const svg = await getExportSvg(selection);
 
-    const payload: UIMessage<IconPayload> = {
-        type: 'update-size',
-        payload: { size: width },
+            return {
+                size: Math.round(width),
+                name: normalizedName,
+                svg,
+            };
+        }),
+    );
+
+    const payload: UIMessage<IconPayload[]> = {
+        type: 'update-icon-data',
+        payload: iconsMetaData,
     };
     figma.ui.postMessage(payload);
 };
@@ -45,34 +54,15 @@ const sendAccessToken = async () => {
     figma.ui.postMessage(payload);
 };
 
-const main = async (selection: SceneNode, uiSetting: ShowUIOptions) => {
+const main = async (selections: readonly SceneNode[], uiSetting: ShowUIOptions) => {
     figma.showUI(__html__, uiSetting);
 
     figma.on('run', async () => {
-        sendMetaDataInfo(selection);
+        await sendMetaDataInfo(selections);
         await sendAccessToken();
     });
 
-    figma.ui.on('message', async (msg: UIMessage<FilesPayloadRequest>) => {
-        if (msg.type === 'export-start') {
-            const { iconName, iconSource, indexSource, category } = msg.payload;
-
-            const payload: UIMessage<FilesPayloadResponse> = {
-                type: 'export-done',
-                payload: {
-                    iconAsset: await getIconAsset(selection, iconName),
-                    iconComponent: getIconComponent(iconName),
-                    indexSource: getIndexSource(indexSource, iconName),
-                    iconSource: getIconSource(iconSource, category, iconName),
-                },
-            };
-            figma.ui.postMessage(payload);
-        }
-
-        if (msg.type === 'create-pr-done') {
-            figma.closePlugin();
-        }
-
+    figma.ui.on('message', async (msg: UIMessage) => {
         if (msg.type === 'cancel') {
             figma.closePlugin();
         }

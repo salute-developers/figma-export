@@ -4,16 +4,16 @@ export interface SelectItem {
 }
 
 export interface FormPayload {
-    category: string;
-    iconName: string;
+    iconsMetaData: IconPayload[];
     commitType: string;
     commitMessage: string;
     pullRequestHeader: string;
 }
 
 export interface IconPayload {
-    size?: number;
-    svg?: string;
+    size: number;
+    svg: string;
+    name: string;
 }
 
 export interface TokenPayloadRequest {
@@ -22,25 +22,24 @@ export interface TokenPayloadRequest {
 
 export type TokenPayloadResponse = TokenPayloadRequest;
 
-export interface FilesPayloadRequest extends FormPayload, Omit<FilesPayloadResponse, 'iconAsset' | 'iconComponent'> {}
-
-export interface FilesPayloadResponse {
+export interface IconComponents {
     iconAsset: string;
     iconComponent: string;
-    indexSource: string;
-    iconSource: string;
+    iconName: string;
+    iconSize: number;
 }
 
-export type MessageType =
-    | 'export-start'
-    | 'create-pr-done'
-    | 'cancel'
-    | 'update-size'
-    | 'export-done'
-    | 'set-token'
-    | 'token';
+export interface FilesPayloadResponse {
+    iconSourceExport: string;
+    iconSourceImport16: string;
+    iconSourceImport24: string;
+    iconSourceImport36: string;
+    iconsComponents: IconComponents[];
+}
 
-export interface UIMessage<T> {
+export type MessageType = 'export-start' | 'cancel' | 'update-icon-data' | 'export-done' | 'set-token' | 'token';
+
+export interface UIMessage<T = unknown> {
     type: MessageType;
     payload: T;
 }
