@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useGithubAuth } from '../hooks/useGithubAuth';
-import {
-    FilesPayloadRequest,
+import type {
     FilesPayloadResponse,
     FormPayload,
     IconPayload,
@@ -11,12 +10,12 @@ import {
     TokenPayloadRequest,
     TokenPayloadResponse,
 } from '../../types';
-import { getFilesSource } from '../api/githubFilesFetcher';
-import { getSalt } from '../../utils';
 import { useRunGithubPRProcess } from '../hooks/useRunGithubPRProcess';
+import { getSalt } from '../../utils';
 
 import { AuthWait } from './authWait/AuthWait';
 import { PullRequestProcess } from './pullRequestProcess/PullRequestProcess';
+import { getFilesPayload, getFilesTree, getGitHubData } from './utils';
 
 import { Footer, Form, Header } from '.';
 
@@ -24,38 +23,25 @@ const StyledRoot = styled.div`
     padding: 6px 12px;
 `;
 
-const filesPath = (name?: string) => ({
-    IconSource: 'packages/plasma-icons/src/Icon.tsx',
-    IndexSource: 'packages/plasma-icons/src/index.ts',
-    IconComponent: `packages/plasma-icons/src/Icons/Icon${name}.tsx`,
-    IconAsset: `packages/plasma-icons/src/Icon.assets/${name}.tsx`,
-});
-
 /**
  * UI окно плагина.
  */
 const App = () => {
     const [token, setToken, getToken] = useGithubAuth();
     const [pullRequestLink, setPullRequestLink] = useState<string | undefined>();
-    const [dataForm, setDataForm] = useState<FormPayload>();
-    const [iconMetaData, setIconMetaData] = useState<IconPayload>({
-        size: 16,
-    });
-    const [step, createGithubPR] = useRunGithubPRProcess({
+    const [iconsMetaData, setIconsMetaData] = useState<IconPayload[]>([]);
+    const [step, createPullRequest] = useRunGithubPRProcess({
         owner: 'salute-developers',
         repo: 'plasma',
         branchName: `icon-export-${getSalt()}`,
     });
 
     const onMessage = useCallback(
-        async (event: MessageEvent<PluginMessage<FilesPayloadResponse | IconPayload | TokenPayloadResponse>>) => {
+        async (event: MessageEvent<PluginMessage<FilesPayloadResponse | IconPayload[] | TokenPayloadResponse>>) => {
             const { type, payload } = event.data.pluginMessage;
 
-            if (type === 'update-size' && 'size' in payload) {
-                setIconMetaData((prevState) => ({
-                    ...prevState,
-                    size: payload.size,
-                }));
+            if (type === 'update-icon-data' && Array.isArray(payload)) {
+                setIconsMetaData(payload);
                 return;
             }
 
@@ -65,61 +51,34 @@ const App = () => {
                     return;
                 }
                 getToken();
-                return;
-            }
-
-            if (type === 'export-done') {
-                const { iconAsset, iconComponent, iconSource, indexSource } = payload as FilesPayloadResponse;
-
-                if (!dataForm) {
-                    return;
-                }
-
-                const { iconName, commitMessage, commitType, pullRequestHeader } = dataForm;
-
-                const filesTree = {
-                    [filesPath().IconSource]: iconSource,
-                    [filesPath().IndexSource]: indexSource,
-                    [filesPath(iconName).IconComponent]: iconComponent,
-                    [filesPath(iconName).IconAsset]: iconAsset,
-                };
-
-                const result = await createGithubPR({
-                    commitMessage: `${commitType}(plasma-icon): ${commitMessage}`,
-                    prTitle: `${commitType}(plasma-icon): ${pullRequestHeader}`,
-                    token,
-                    filesTree,
-                });
-
-                setPullRequestLink(result?.data.html_url);
             }
         },
-        [setToken, getToken, token, dataForm, createGithubPR],
+        [setToken, getToken],
     );
 
     const onSubmit = useCallback(
-        async (data: FormPayload) => {
-            const [iconSource, indexSource] = await getFilesSource(
-                'salute-developers',
-                'plasma',
-                [filesPath().IconSource, filesPath().IndexSource],
-                token,
-            );
+        async ({ commitMessage, commitType, pullRequestHeader, iconsMetaData: newIconsMetaData }: FormPayload) => {
+            const githubData = await getGitHubData(token);
 
-            if (!iconSource || !indexSource) {
+            if (githubData.some((item) => !item)) {
                 getToken();
                 return;
             }
 
-            setDataForm(data);
+            const filesPayload = getFilesPayload(newIconsMetaData, ...githubData);
 
-            const payload: PluginMessage<FilesPayloadRequest> = {
-                pluginMessage: { type: 'export-start', payload: { ...data, iconSource, indexSource } },
-            };
-            // eslint-disable-next-line no-restricted-globals
-            parent.postMessage(payload, '*');
+            const filesTree = getFilesTree(filesPayload);
+
+            const result = await createPullRequest({
+                commitMessage: `${commitType}(plasma-icons): ${commitMessage}`,
+                prTitle: `${commitType}(plasma-icons): ${pullRequestHeader}`,
+                filesTree,
+                token,
+            });
+
+            setPullRequestLink(result?.data.html_url);
         },
-        [getToken, token],
+        [getToken, token, createPullRequest],
     );
 
     useEffect(() => {
@@ -159,7 +118,7 @@ const App = () => {
     return (
         <StyledRoot>
             <Header />
-            <Form onSubmit={onSubmit} iconMetaData={iconMetaData} />
+            <Form onSubmit={onSubmit} iconsMetaData={iconsMetaData} />
             <Footer />
         </StyledRoot>
     );

@@ -1,25 +1,11 @@
-import React, { ChangeEvent, FC, FormEvent, useCallback, useState } from 'react';
+import React, { ChangeEvent, FC, FormEvent, useCallback, useMemo, useState } from 'react';
 import { TextField, Select } from '@salutejs/plasma-web';
 
 import type { FormPayload, IconPayload, SelectItem } from '../../../types';
 import { Input } from '../input/Input';
+import { IconList } from '../iconList/IconList';
 
-import { StyledCommitMessage, StyledForm } from './Form.style';
-
-const categories: SelectItem[] = [
-    { value: 'navigation', label: 'Navigation' },
-    { value: 'universal', label: 'Universal' },
-    { value: 'action', label: 'Action' },
-    { value: 'alert', label: 'Alert' },
-    { value: 'av', label: 'Av' },
-    { value: 'connection', label: 'Connection' },
-    { value: 'hardware', label: 'Hardware' },
-    { value: 'communication', label: 'Communication' },
-    { value: 'files', label: 'Files' },
-    { value: 'map', label: 'Map' },
-    { value: 'other', label: 'Other' },
-    { value: 'logo', label: 'Logo' },
-];
+import { StyledCommitMessage, StyledForm, StyledPullRequestData } from './Form.style';
 
 const commitTypes: SelectItem[] = [
     { label: 'feat', value: 'feat' },
@@ -27,8 +13,6 @@ const commitTypes: SelectItem[] = [
 ];
 
 const defaultState = {
-    category: 'navigation',
-    iconName: 'NameTest',
     commitType: 'feat',
     commitMessage: 'Add icon `IconNameTest`',
     pullRequestHeader: 'Add icon `IconNameTest`',
@@ -36,14 +20,14 @@ const defaultState = {
 
 interface FormProps {
     onSubmit?: (data: FormPayload) => Promise<void>;
-    iconMetaData: IconPayload;
+    iconsMetaData: IconPayload[];
 }
 
 /**
  * Элементы формы для ввода данных.
  */
-export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconMetaData }) => {
-    const [state, setState] = useState<FormPayload>(defaultState);
+export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
+    const [state, setState] = useState<FormPayload>({ ...defaultState, iconsMetaData });
 
     const onSubmitForm = useCallback(
         async (event: FormEvent) => {
@@ -73,33 +57,48 @@ export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconMetaData }) => {
         }));
     }, []);
 
+    const onChangeIconsName = useCallback((data: IconPayload[]) => {
+        setState((prevState) => ({
+            ...prevState,
+            iconsMetaData: data,
+        }));
+    }, []);
+
+    const sortedIconsMetaData = useMemo(
+        // eslint-disable-next-line no-nested-ternary
+        () => iconsMetaData.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0)),
+        [iconsMetaData],
+    );
+
     return (
         <StyledForm id="form" onSubmit={onSubmitForm}>
-            <Input label="Repository" content={<TextField readOnly value="salute-developers/plasma" />} />
-            <Input label="Icon size" content={<TextField readOnly value={iconMetaData.size} />} />
-            <Input
-                label="Icon name"
-                content={<TextField name="iconName" value={state.iconName} onChange={onChangeTextField} />}
-            />
-            <Input
-                label="Category"
-                content={<Select value={state.category} onChange={onChangeSelect('category')} items={categories} />}
-            />
-            <Input
-                label="Commit message"
-                content={
-                    <StyledCommitMessage>
-                        <Select value={state.commitType} onChange={onChangeSelect('commitType')} items={commitTypes} />
-                        <TextField name="commitMessage" value={state.commitMessage} onChange={onChangeTextField} />
-                    </StyledCommitMessage>
-                }
-            />
-            <Input
-                label="Pull Request header"
-                content={
-                    <TextField name="pullRequestHeader" value={state.pullRequestHeader} onChange={onChangeTextField} />
-                }
-            />
+            <IconList onChangeIconsName={onChangeIconsName} iconsMetaData={sortedIconsMetaData} />
+            <StyledPullRequestData>
+                <Input label="Repository" content={<TextField readOnly value="salute-developers/plasma" />} />
+                <Input
+                    label="Commit message"
+                    content={
+                        <StyledCommitMessage>
+                            <Select
+                                value={state.commitType}
+                                onChange={onChangeSelect('commitType')}
+                                items={commitTypes}
+                            />
+                            <TextField name="commitMessage" value={state.commitMessage} onChange={onChangeTextField} />
+                        </StyledCommitMessage>
+                    }
+                />
+                <Input
+                    label="Pull Request header"
+                    content={
+                        <TextField
+                            name="pullRequestHeader"
+                            value={state.pullRequestHeader}
+                            onChange={onChangeTextField}
+                        />
+                    }
+                />
+            </StyledPullRequestData>
         </StyledForm>
     );
 };
