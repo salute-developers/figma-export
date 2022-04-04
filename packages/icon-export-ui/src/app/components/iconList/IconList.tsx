@@ -8,18 +8,18 @@ import { StyledIconList, StyledIconListContainer } from './IconList.style';
 
 const categories: SelectItem[] = [
     { value: '--no-category--', label: '--no-category--' },
-    // { value: 'navigation', label: 'Navigation' },
-    // { value: 'universal', label: 'Universal' },
-    // { value: 'action', label: 'Action' },
-    // { value: 'alert', label: 'Alert' },
-    // { value: 'av', label: 'Av' },
-    // { value: 'connection', label: 'Connection' },
-    // { value: 'hardware', label: 'Hardware' },
-    // { value: 'communication', label: 'Communication' },
-    // { value: 'files', label: 'Files' },
-    // { value: 'map', label: 'Map' },
-    // { value: 'other', label: 'Other' },
-    // { value: 'logo', label: 'Logo' },
+    { value: 'navigation', label: 'Navigation' },
+    { value: 'universal', label: 'Universal' },
+    { value: 'action', label: 'Action' },
+    { value: 'alert', label: 'Alert' },
+    { value: 'av', label: 'Av' },
+    { value: 'connection', label: 'Connection' },
+    { value: 'hardware', label: 'Hardware' },
+    { value: 'communication', label: 'Communication' },
+    { value: 'files', label: 'Files' },
+    { value: 'map', label: 'Map' },
+    { value: 'other', label: 'Other' },
+    { value: 'logo', label: 'Logo' },
 ];
 
 interface IconListProps {

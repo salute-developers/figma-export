@@ -1,25 +1,30 @@
-import { capitalizeFirstLetter, insertString } from '../utils';
+import { insertString, lowerFirstLetter } from '../utils';
 
-const EXPORT_ICON_SET_OBJECT_LINE = 'export const iconSectionsSet';
+const EXPORT_ICON_SET_OBJECT_LINE = 'export const iconSet';
 
-const getStartIndexCategory = (source: string, category: string) => source.search(`${category}: {`);
+const getStartIndex = (source: string, text: string) => source.search(text);
 
-const getEndIndexCategory = (source: string, index: number) => source.substring(index).search('\n    }');
+const getEndIndex = (source: string, index: number) => source.substring(index).search('}');
 
-const addToIconSectionsSet = (source: string, index: number, iconName: string) =>
-    insertString(source, index, ` \n        ${capitalizeFirstLetter(iconName)}: ${iconName},`);
+const addToIconSet = (source: string, index: number, iconName: string) =>
+    insertString(source, index, `    ${lowerFirstLetter(iconName)}: ${iconName},\n`);
 
-const getIconImport = (iconName: string) => `\nimport { ${iconName} } from './Icon.assets/${iconName}';\n`;
+const getIconImport = (iconName: string) => `import { ${iconName} } from './${iconName}';\n`;
 
 /**
  * Функция модификации файла `/icon.tsx`. Здесь вставляется сгенерированный импорт иконки,
- * и добавляется её компонент в выбранную категорию
+ * и добавляется её компонент в общий список иконок
  */
-export default (source: string, category: string, iconName: string) => {
+export default (source: string, iconName: string) => {
+    if (source.includes(`{ ${iconName} }`)) {
+        return source;
+    }
+
     const index = source.search(EXPORT_ICON_SET_OBJECT_LINE) - 1;
     const newSource = insertString(source, index, getIconImport(iconName));
 
-    const startIndex = getStartIndexCategory(newSource, category);
-    const endIndex = getEndIndexCategory(newSource, startIndex);
-    return addToIconSectionsSet(newSource, startIndex + endIndex, iconName);
+    const startIndex = getStartIndex(newSource, EXPORT_ICON_SET_OBJECT_LINE);
+    const endIndex = getEndIndex(newSource, startIndex);
+
+    return addToIconSet(newSource, startIndex + endIndex, iconName);
 };
