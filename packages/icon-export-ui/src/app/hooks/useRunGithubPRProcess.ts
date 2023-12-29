@@ -24,9 +24,11 @@ interface CreatPR {
     token?: string;
 }
 
-const saveMetaData = (octokit: Octokit, owner: string, repo: string) => <T>(fn: (...args: any[]) => Promise<T>) => (
-    ...args: any[]
-) => fn(octokit, owner, repo, ...args);
+const saveMetaData =
+    (octokit: Octokit, owner: string, repo: string) =>
+    <T>(fn: (...args: any[]) => Promise<T>) =>
+    (...args: any[]) =>
+        fn(octokit, owner, repo, ...args);
 
 /**
  * Хук для запуска процесса создания пул реквеста в GitHub. Возвращает:
@@ -44,7 +46,7 @@ export const useRunGithubPRProcess = ({ owner, repo, branchName }: RunProcessGit
 
             const withMetaData = saveMetaData(octokit, owner, repo);
 
-            if (branchName !== 'master') {
+            if (branchName !== 'master' && branchName !== 'dev') {
                 setStep(0);
                 await withMetaData(createBranch)(branchName);
             }
@@ -66,7 +68,7 @@ export const useRunGithubPRProcess = ({ owner, repo, branchName }: RunProcessGit
             await withMetaData(updateCommit)(branchName, newCommitSha);
 
             let pullRequest;
-            if (branchName !== 'master') {
+            if (branchName !== 'master' && branchName !== 'dev') {
                 setStep(6);
                 pullRequest = await withMetaData(createPullRequest)(branchName, prTitle);
             }

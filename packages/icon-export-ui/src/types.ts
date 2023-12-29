@@ -14,6 +14,7 @@ export interface IconPayload {
     size: number;
     svg: string;
     name: string;
+    category: string;
 }
 
 export interface TokenPayloadRequest {
@@ -31,6 +32,7 @@ export interface IconComponents {
 
 export interface FilesPayloadResponse {
     iconSourceExport: string;
+    iconSourceComponent: string;
     iconSourceImport16: string;
     iconSourceImport24: string;
     iconSourceImport36: string;

@@ -12,7 +12,7 @@ const addToIconSet = (source: string, index: number, iconName: string) =>
 const getIconImport = (iconName: string) => `import { ${iconName} } from './${iconName}';\n`;
 
 /**
- * Функция модификации файла `/icon.tsx`. Здесь вставляется сгенерированный импорт иконки,
+ * Функция модификации файла `/icon.ts`. Здесь вставляется сгенерированный импорт иконки,
  * и добавляется её компонент в общий список иконок
  */
 export default (source: string, iconName: string) => {

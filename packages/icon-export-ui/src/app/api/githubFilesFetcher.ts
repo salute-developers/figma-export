@@ -87,7 +87,7 @@ export const updateCommit = async (octokit: Octokit, owner: string, repo: string
     });
 
 export const createBranch = async (octokit: Octokit, owner: string, repo: string, branchName: string) => {
-    const { commitSha } = await getCurrentSha(octokit, owner, repo, 'master');
+    const { commitSha } = await getCurrentSha(octokit, owner, repo, 'dev');
 
     await octokit.rest.git.createRef({
         owner,
@@ -107,7 +107,7 @@ export const createPullRequest = async (
     octokit.rest.pulls.create({
         owner,
         repo,
-        base: 'refs/heads/master',
+        base: 'refs/heads/dev',
         head: `refs/heads/${branchName}`,
         title,
     });
@@ -131,6 +131,7 @@ export const getFilesSource = async (
                 owner,
                 repo,
                 path,
+                ref: 'dev',
             });
 
             return result.data;
