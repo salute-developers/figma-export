@@ -1,26 +1,10 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { ParagraphText1 } from '@salutejs/plasma-web';
 
-import type { SelectItem, IconPayload } from '../../../types';
+import type { IconPayload } from '../../../types';
 import { IconItem } from '../iconItem/IconItem';
 
 import { StyledIconList, StyledIconListContainer } from './IconList.style';
-
-const categories: SelectItem[] = [
-    { value: '--no-category--', label: '--no-category--' },
-    { value: 'navigation', label: 'Navigation' },
-    { value: 'universal', label: 'Universal' },
-    { value: 'action', label: 'Action' },
-    { value: 'alert', label: 'Alert' },
-    { value: 'av', label: 'Av' },
-    { value: 'connection', label: 'Connection' },
-    { value: 'hardware', label: 'Hardware' },
-    { value: 'communication', label: 'Communication' },
-    { value: 'files', label: 'Files' },
-    { value: 'map', label: 'Map' },
-    { value: 'other', label: 'Other' },
-    { value: 'logo', label: 'Logo' },
-];
 
 interface IconListProps {
     iconsMetaData: IconPayload[];
@@ -31,12 +15,7 @@ interface IconListProps {
  * Список выбранных иконок.
  */
 export const IconList: FC<IconListProps> = ({ onChangeIconsName, iconsMetaData }) => {
-    const [state, setState] = useState(
-        iconsMetaData.reduce((acc: Record<string, IconPayload>, item, i) => {
-            acc[`${item.name}${i}`] = item;
-            return acc;
-        }, {}),
-    );
+    const [state, setState] = useState<Record<string, IconPayload>>();
 
     const onChangeInput = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -44,12 +23,17 @@ export const IconList: FC<IconListProps> = ({ onChangeIconsName, iconsMetaData }
 
             const iconKey = event.target.name;
 
+            if (!state) {
+                return;
+            }
+
             const newState = {
                 ...state,
                 [iconKey]: {
                     size: state[iconKey].size,
                     svg: state[iconKey].svg,
                     name: event.target.value,
+                    category: state[iconKey].category,
                 },
             };
 
@@ -60,20 +44,31 @@ export const IconList: FC<IconListProps> = ({ onChangeIconsName, iconsMetaData }
         [state, onChangeIconsName],
     );
 
+    useEffect(() => {
+        if (!iconsMetaData.length) {
+            return;
+        }
+
+        const fromData = iconsMetaData.reduce((acc: Record<string, IconPayload>, item, i) => {
+            acc[`${item.name}${i}`] = item;
+            return acc;
+        }, {});
+        setState(fromData);
+    }, [iconsMetaData]);
+
     return (
         <StyledIconList>
             <ParagraphText1>Icon list: {iconsMetaData.length}</ParagraphText1>
             <StyledIconListContainer>
-                {iconsMetaData.map(({ name }, i) => (
-                    <IconItem
-                        key={`${name}${i}`}
-                        name={`${name}${i}`}
-                        item={state[`${name}${i}`]}
-                        category="--no-category--"
-                        categories={categories}
-                        onChangeInput={onChangeInput}
-                    />
-                ))}
+                {state &&
+                    iconsMetaData.map(({ name }, i) => (
+                        <IconItem
+                            key={`${name}${i}`}
+                            name={`${name}${i}`}
+                            item={state[`${name}${i}`]}
+                            onChangeInput={onChangeInput}
+                        />
+                    ))}
             </StyledIconListContainer>
         </StyledIconList>
     );

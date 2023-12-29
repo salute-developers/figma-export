@@ -1,8 +1,8 @@
 import React, { ChangeEvent, FC } from 'react';
-import { Select, TextField } from '@salutejs/plasma-web';
+import { TextField } from '@salutejs/plasma-web';
 
 import { Input } from '../input/Input';
-import type { IconPayload, SelectItem } from '../../../types';
+import type { IconPayload } from '../../../types';
 import { IconPreview } from '../iconPreview/IconPreview';
 
 import { StyledFirstBlock, StyledIconItem, StyledSecondBlock } from './IconItem.style';
@@ -10,20 +10,20 @@ import { StyledFirstBlock, StyledIconItem, StyledSecondBlock } from './IconItem.
 interface IconItemProps {
     name: string;
     item: IconPayload;
-    category: string;
-    categories: SelectItem[];
     onChangeInput: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const IconItem: FC<IconItemProps> = ({ name, item, category, categories, onChangeInput }) => (
-    <StyledIconItem>
-        <StyledFirstBlock>
-            <Input label="Svg" content={<IconPreview svg={item.svg} />} />
-            <Input label="Size" content={<TextField readOnly value={item.size} />} />
-        </StyledFirstBlock>
-        <StyledSecondBlock>
-            <Input label="Name" content={<TextField name={name} value={item.name} onChange={onChangeInput} />} />
-            <Input label="Category" content={<Select value={category} items={categories} />} />
-        </StyledSecondBlock>
-    </StyledIconItem>
-);
+export const IconItem: FC<IconItemProps> = ({ name, item, onChangeInput }) => {
+    return (
+        <StyledIconItem>
+            <StyledFirstBlock>
+                <Input label="Svg" content={<IconPreview svg={item.svg} />} />
+                <Input label="Size" content={<TextField readOnly value={item.size} />} />
+            </StyledFirstBlock>
+            <StyledSecondBlock>
+                <Input label="Name" content={<TextField name={name} value={item.name} onChange={onChangeInput} />} />
+                <Input label="Category" content={<TextField readOnly value={item.category} />} />
+            </StyledSecondBlock>
+        </StyledIconItem>
+    );
+};

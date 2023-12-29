@@ -10,34 +10,69 @@ const defaultSetting = {
     width: 700,
 };
 
+/**
+ * Получить имя, размер и категорию из полного имени
+ * Example:
+ * 24 / Operation / 24_ShareScreenOutline - новый формат
+ * Player / ic_36_pause_outline - старый формат
+ */
 const getNormalizedName = (name: string) => {
-    const secondPart = camelize(name).split('/')[1] || camelize(name);
-    const withoutPrefix = secondPart
-        .trim()
-        .replace(/^(\s*)[a-zA-Z_]+(\d\d)/g, '')
-        .replace(/\s/g, '');
-    return upperFirstLetter(withoutPrefix);
+    const trimmedName = name.replace(/\s/g, '');
+    // в новом формате
+    const [size, category, nameWithSize] = trimmedName.split('/');
+
+    if (!size || !category || !nameWithSize) {
+        const last = camelize(trimmedName).split('/').slice(-1)[0];
+        const withoutPrefix = last
+            .trim()
+            .replace(/^(\s*)[a-zA-Z_]+(\d\d)/g, '') // убирает все символы и размер перед названием: ic36pauseOutline -> pauseOutline
+            .replace(/\s/g, '');
+        return upperFirstLetter(withoutPrefix);
+    }
+
+    return {
+        size,
+        category,
+        name: upperFirstLetter(nameWithSize.split('_').slice(-1)[0]), // убирает размер перед названием
+    };
+};
+
+const getNames = async (node: ComponentNode | InstanceNode) => {
+    const { width, name: nodeName } = node;
+
+    const normalizedName = getNormalizedName(nodeName);
+    const svg = await getExportSvg(node);
+
+    const isString = typeof normalizedName === 'string';
+
+    return {
+        size: isString ? Math.round(width) : Number(normalizedName.size),
+        category: isString ? 'Other' : normalizedName.category,
+        name: isString ? normalizedName : normalizedName.name,
+        svg,
+    };
 };
 
 const sendMetaDataInfo = async (selections: readonly SceneNode[]) => {
     const iconsMetaData = await Promise.all(
         selections.map(async (selection) => {
-            const { width, name } = selection;
+            const { type } = selection;
 
-            const normalizedName = getNormalizedName(name);
-            const svg = await getExportSvg(selection);
+            if (type !== 'FRAME') {
+                return [];
+            }
 
-            return {
-                size: Math.round(width),
-                name: normalizedName,
-                svg,
-            };
+            const nodes = (selection as FrameNode).findAllWithCriteria({
+                types: ['COMPONENT', 'INSTANCE'],
+            });
+
+            return await Promise.all(nodes.map(getNames));
         }),
     );
 
     const payload: UIMessage<IconPayload[]> = {
         type: 'update-icon-data',
-        payload: iconsMetaData,
+        payload: iconsMetaData.flat(),
     };
     figma.ui.postMessage(payload);
 };

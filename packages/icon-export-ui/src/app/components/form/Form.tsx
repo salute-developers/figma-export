@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, FormEvent, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { TextField, Select } from '@salutejs/plasma-web';
 
 import type { FormPayload, IconPayload, SelectItem } from '../../../types';
@@ -28,6 +28,17 @@ interface FormProps {
  */
 export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
     const [state, setState] = useState<FormPayload>({ ...defaultState, iconsMetaData });
+
+    useEffect(() => {
+        if (!iconsMetaData.length) {
+            return;
+        }
+
+        setState((prevState) => ({
+            ...prevState,
+            iconsMetaData,
+        }));
+    }, [iconsMetaData]);
 
     const onSubmitForm = useCallback(
         async (event: FormEvent) => {

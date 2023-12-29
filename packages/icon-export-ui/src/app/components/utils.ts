@@ -3,7 +3,7 @@ import prettier from 'prettier/standalone';
 import type { Options } from 'prettier';
 
 import { FilesPayloadResponse, IconComponents, IconPayload } from '../../types';
-import { getIconAsset, getIconComponent, getIconSource, getIndexSource } from '../../source';
+import { getIconAsset, getIconComponent, getIconSource, getIndexSource, getIconCategories } from '../../source';
 import { getFilesSource } from '../api/githubFilesFetcher';
 
 const prettierSetting: Options = {
@@ -24,6 +24,7 @@ export const prettify = (source: string) => prettier.format(source, prettierSett
 
 export const getFilesPath = (iconName?: string, iconSize?: number) => ({
     iconSourceExport: 'packages/plasma-icons/src/scalable/index.ts',
+    iconSourceComponent: 'packages/plasma-icons/src/scalable/Icon.tsx',
     iconSourceImport16: 'packages/plasma-icons/src/scalable/Icon.assets.16/index.ts',
     iconSourceImport24: 'packages/plasma-icons/src/scalable/Icon.assets.24/index.ts',
     iconSourceImport36: 'packages/plasma-icons/src/scalable/Icon.assets.36/index.ts',
@@ -32,9 +33,9 @@ export const getFilesPath = (iconName?: string, iconSize?: number) => ({
 });
 
 export const getFilesPayload = (iconsMetaData: IconPayload[], ...args: string[]): FilesPayloadResponse => {
-    let [iconSourceExport, iconSourceImport16, iconSourceImport24, iconSourceImport36] = args;
+    let [iconSourceExport, iconSourceComponent, iconSourceImport16, iconSourceImport24, iconSourceImport36] = args;
 
-    const iconsComponents = iconsMetaData.map(({ size, name = 'IconName', svg }) => {
+    const iconsComponents = iconsMetaData.map(({ size, name = 'IconName', category, svg }) => {
         iconSourceExport = getIndexSource(iconSourceExport, name);
 
         if (size === 16) {
@@ -47,6 +48,8 @@ export const getFilesPayload = (iconsMetaData: IconPayload[], ...args: string[])
             iconSourceImport36 = getIconSource(iconSourceImport36, name);
         }
 
+        iconSourceComponent = getIconCategories(iconSourceComponent, name, size, category);
+
         return {
             iconSize: size,
             iconName: name,
@@ -58,6 +61,7 @@ export const getFilesPayload = (iconsMetaData: IconPayload[], ...args: string[])
     return {
         iconsComponents,
         iconSourceExport,
+        iconSourceComponent,
         iconSourceImport16,
         iconSourceImport24,
         iconSourceImport36,
@@ -70,6 +74,7 @@ export const getGitHubData = async (token?: string, owner = 'salute-developers',
         repo,
         [
             getFilesPath().iconSourceExport,
+            getFilesPath().iconSourceComponent,
             getFilesPath().iconSourceImport16,
             getFilesPath().iconSourceImport24,
             getFilesPath().iconSourceImport36,
@@ -87,6 +92,7 @@ export const getFlatIconFiles = (iconsComponents: IconComponents[]) =>
 
 export const getFilesTree = ({
     iconSourceExport,
+    iconSourceComponent,
     iconSourceImport16,
     iconSourceImport24,
     iconSourceImport36,
@@ -96,6 +102,7 @@ export const getFilesTree = ({
 
     return {
         [getFilesPath().iconSourceExport]: iconSourceExport,
+        [getFilesPath().iconSourceComponent]: iconSourceComponent,
         [getFilesPath().iconSourceImport16]: iconSourceImport16,
         [getFilesPath().iconSourceImport24]: iconSourceImport24,
         [getFilesPath().iconSourceImport36]: iconSourceImport36,
