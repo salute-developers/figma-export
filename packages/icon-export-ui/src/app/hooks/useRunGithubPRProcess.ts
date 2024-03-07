@@ -46,6 +46,7 @@ export const useRunGithubPRProcess = ({ owner, repo, branchName }: RunProcessGit
 
             const withMetaData = saveMetaData(octokit, owner, repo);
 
+            // закомментить 0, 6, 7 step для добавления в существующую ветку
             if (branchName !== 'master' && branchName !== 'dev') {
                 setStep(0);
                 await withMetaData(createBranch)(branchName);

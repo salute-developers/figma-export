@@ -16,7 +16,7 @@ const FETCH_DELAY = 1_500;
  * onGetToken - метод для получения токена
  */
 export const useGithubAuth = () => {
-    const [token, setToken] = useState<string | undefined>();
+    const [token, setToken] = useState<string | undefined>(); // сюда можно вставить свой собтвенный токен
 
     const onSetToken = useCallback((value?: string) => setToken(value), []);
 
