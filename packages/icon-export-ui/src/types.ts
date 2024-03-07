@@ -24,18 +24,13 @@ export interface TokenPayloadRequest {
 export type TokenPayloadResponse = TokenPayloadRequest;
 
 export interface IconComponents {
-    iconAsset: string;
-    iconComponent: string;
     iconName: string;
     iconSize: number;
+    iconSvgAsset: string;
 }
 
 export interface FilesPayloadResponse {
-    iconSourceExport: string;
     iconSourceComponent: string;
-    iconSourceImport16: string;
-    iconSourceImport24: string;
-    iconSourceImport36: string;
     iconsComponents: IconComponents[];
 }
 

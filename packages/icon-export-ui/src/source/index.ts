@@ -1,5 +1,2 @@
-export { default as getIconSource } from './iconSource';
-export { default as getIndexSource } from './indexSource';
-export { default as getIconAsset } from './iconAsset';
-export { default as getIconComponent } from './iconComponent';
+export { default as getIconSvg } from './iconSvg';
 export { default as getIconCategories } from './iconCategories';
