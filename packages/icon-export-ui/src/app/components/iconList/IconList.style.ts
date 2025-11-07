@@ -1,7 +1,13 @@
 import styled from 'styled-components';
 
+export const StyledIconListHeader = styled.header`
+    padding: 8px 4px;
+`;
+
 export const StyledIconList = styled.div`
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 `;
 
 export const StyledIconListContainer = styled.div`

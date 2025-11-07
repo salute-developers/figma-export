@@ -1,10 +1,10 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
-import { ParagraphText1 } from '@salutejs/plasma-web';
+import { Headline5 } from '@salutejs/plasma-web';
 
 import type { IconPayload } from '../../../types';
 import { IconItem } from '../iconItem/IconItem';
 
-import { StyledIconList, StyledIconListContainer } from './IconList.style';
+import { StyledIconList, StyledIconListContainer, StyledIconListHeader } from './IconList.style';
 
 interface IconListProps {
     iconsMetaData: IconPayload[];
@@ -46,6 +46,7 @@ export const IconList: FC<IconListProps> = ({ onChangeIconsName, iconsMetaData }
 
     useEffect(() => {
         if (!iconsMetaData.length) {
+            setState({});
             return;
         }
 
@@ -56,19 +57,31 @@ export const IconList: FC<IconListProps> = ({ onChangeIconsName, iconsMetaData }
         setState(fromData);
     }, [iconsMetaData]);
 
+    // Группируем иконки по имени и считаем уникальные
+    const uniqueIcons = new Set(iconsMetaData.map((icon) => icon.name));
+    const sizesText =
+        uniqueIcons.size === 1
+            ? `${iconsMetaData.length} size(s) of 1 icon`
+            : `${iconsMetaData.length} total (${uniqueIcons.size} unique icons)`;
+
     return (
         <StyledIconList>
-            <ParagraphText1>Icon list: {iconsMetaData.length}</ParagraphText1>
+            <StyledIconListHeader>
+                <Headline5>Icons: {sizesText}</Headline5>
+            </StyledIconListHeader>
             <StyledIconListContainer>
                 {state &&
-                    iconsMetaData.map(({ name }, i) => (
-                        <IconItem
-                            key={`${name}${i}`}
-                            name={`${name}${i}`}
-                            item={state[`${name}${i}`]}
-                            onChangeInput={onChangeInput}
-                        />
-                    ))}
+                    iconsMetaData.map(({ name }, i) => {
+                        const key = `${name}${i}`;
+                        const item = state[key];
+
+                        // Пропускаем если данные еще не синхронизированы
+                        if (!item) {
+                            return null;
+                        }
+
+                        return <IconItem key={key} name={key} item={item} onChangeInput={onChangeInput} />;
+                    })}
             </StyledIconListContainer>
         </StyledIconList>
     );
