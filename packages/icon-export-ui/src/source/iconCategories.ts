@@ -8,8 +8,16 @@ const getEndIndex = (source: string, index: number) => source.substring(index).s
 
 const getCategoryEndIndex = (source: string, index: number) => source.substring(index).search('    },');
 
+// Заменяет "." на "_" в имени иконки, чтобы ключ и значение соответствовали имени SVG-файла.
+// Результат для "Pressure2.5": pressure2_5: 'Pressure2_5',
+const sanitizeIconName = (name: string) => name.replace(/\./g, '_');
+
 const addToIconCategory = (source: string, index: number, iconName: string) =>
-    insertString(source, index, `        ${lowerFirstLetter(iconName)}: '${iconName}',\n`);
+    insertString(
+        source,
+        index,
+        `        ${lowerFirstLetter(sanitizeIconName(iconName))}: '${sanitizeIconName(iconName)}',\n`,
+    );
 
 const addToCategories = (source: string, start: number, iconName: string, category: string) => {
     let newSource = source;
@@ -39,7 +47,7 @@ const createIconCategory = (source: string, index: number, category: string) =>
  * и добавляется её компонент в список иконок по категориям
  */
 export default (source: string, iconName: string, category: string) => {
-    if (source.includes(`'${iconName}'`)) {
+    if (source.includes(`'${sanitizeIconName(iconName)}'`)) {
         return source;
     }
 

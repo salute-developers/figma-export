@@ -22,10 +22,14 @@ const prettierSetting: Options = {
 
 export const prettify = (source: string) => prettier.format(source, prettierSetting);
 
+// Заменяет точки на "_" в имени файла, чтобы имена вроде "Pressure2.5" не создавали файл "Pressure2.5.svg",
+// где точка ломает сборку, интерпретируясь как разделитель расширения. Результат: "Pressure2_5.svg".
+const sanitizeFileName = (name: string) => name.replace(/\./g, '_');
+
 // Эскпортируем svg и информацию по категориям
 export const getFilesPath = (iconName?: string, iconSize?: number) => ({
     iconSourceComponent: 'packages/plasma-icons/src/scalable/Icon.tsx',
-    iconSvgAsset: `packages/plasma-icons/src/scalable/Icon.svg.${iconSize}/${iconName}.svg`,
+    iconSvgAsset: `packages/plasma-icons/src/scalable/Icon.svg.${iconSize}/${sanitizeFileName(iconName || '')}.svg`,
 });
 
 export const getFilesPayload = (iconsMetaData: IconPayload[], ...args: string[]): FilesPayloadResponse => {
