@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const StyledForm = styled.form`
     display: flex;
     align-items: center;
+    flex-direction: column;
 
     margin-top: 12px;
     margin-bottom: 24px;
@@ -17,6 +18,9 @@ export const StyledCommitMessage = styled.div`
 `;
 
 export const StyledPullRequestData = styled.div`
-    flex: 1;
+    display: flex;
+    flex-direction: column;
     margin-left: 24px;
+
+    width: 100%;
 `;

@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { TextField, Select } from '@salutejs/plasma-web';
+import { TextField, Select, Button } from '@salutejs/plasma-web';
 
-import type { FormPayload, IconPayload, SelectItem } from '../../../types';
+import type { IconPayload, SelectItem } from '../../../types';
 import { Input } from '../input/Input';
 import { IconList } from '../iconList/IconList';
 
@@ -12,22 +12,29 @@ const commitTypes: SelectItem[] = [
     { label: 'fix', value: 'fix' },
 ];
 
-const defaultState = {
+interface FormState {
+    commitType: string;
+    commitMessage: string;
+    iconsMetaData: IconPayload[];
+}
+
+const defaultState: Omit<FormState, 'iconsMetaData'> = {
     commitType: 'feat',
     commitMessage: 'Add icon `IconNameTest`',
-    pullRequestHeader: 'Add icon `IconNameTest`',
 };
 
 interface FormProps {
-    onSubmit?: (data: FormPayload) => Promise<void>;
+    onSubmit: (data: { iconsMetaData: IconPayload[]; commitMessage: string }) => void | Promise<void>;
     iconsMetaData: IconPayload[];
+    isLoading?: boolean;
+    buttonText?: string;
 }
 
 /**
  * Элементы формы для ввода данных.
  */
-export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
-    const [state, setState] = useState<FormPayload>({ ...defaultState, iconsMetaData });
+export const Form: FC<FormProps> = ({ onSubmit, iconsMetaData, isLoading = false, buttonText = 'Add Icon' }) => {
+    const [state, setState] = useState<FormState>({ ...defaultState, iconsMetaData });
 
     useEffect(() => {
         if (!iconsMetaData.length) {
@@ -44,7 +51,13 @@ export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
         async (event: FormEvent) => {
             event.preventDefault();
 
-            onSubmit(state);
+            // Формируем полное сообщение коммита
+            const fullCommitMessage = `${state.commitType}(plasma-icons): ${state.commitMessage}`;
+
+            await onSubmit({
+                iconsMetaData: state.iconsMetaData,
+                commitMessage: fullCommitMessage,
+            });
         },
         [onSubmit, state],
     );
@@ -89,6 +102,8 @@ export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
         [iconsMetaData],
     );
 
+    const isDisabled = isLoading || iconsMetaData.length === 0;
+
     return (
         <StyledForm id="form" onSubmit={onSubmitForm}>
             <IconList onChangeIconsName={onChangeIconsName} iconsMetaData={sortedIconsMetaData} />
@@ -107,17 +122,10 @@ export const Form: FC<FormProps> = ({ onSubmit = () => {}, iconsMetaData }) => {
                         </StyledCommitMessage>
                     }
                 />
-                <Input
-                    label="Pull Request header"
-                    content={
-                        <TextField
-                            name="pullRequestHeader"
-                            value={state.pullRequestHeader}
-                            onChange={onChangeTextField}
-                        />
-                    }
-                />
             </StyledPullRequestData>
+            <Button type="submit" view="primary" disabled={isDisabled} style={{ marginTop: '12px' }}>
+                {isLoading ? 'Adding...' : buttonText}
+            </Button>
         </StyledForm>
     );
 };
