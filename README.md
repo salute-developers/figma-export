@@ -4,7 +4,8 @@ This plugin can export selected icon from figma layouts.
 
 ### Install
 
-```
+```sh
+npm ci
 npm run build
 ```
 
@@ -60,4 +61,4 @@ const result = await octokit.rest.repos.getContent({
 
 Этот "трюк" позволит создавать новые commits и добавлять их к **уже** **созданной** ветке/pull request.
 
-Примечание: В корне пакета `icon-export-ui` должен быть запущен webpack - `npm run watch`.
+Примечание: В корне проекта должен быть запущен webpack — `npm run watch`.
