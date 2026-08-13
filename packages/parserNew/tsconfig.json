@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "CommonJS",
+    "jsx": "react",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["@figma/plugin-typings"],
+    "lib": ["ES2018", "DOM"]
+  },
+  "include": ["./src"]
+}

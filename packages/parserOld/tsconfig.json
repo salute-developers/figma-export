@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2019",
+    "lib": ["ES2019", "DOM"],
     "module": "CommonJS",
     "outDir": "dist",
     "jsx": "react",
@@ -10,7 +11,7 @@
     "removeComments": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"],
+    "typeRoots": ["../../node_modules/@types", "../../node_modules/@figma"],
     "declaration": true,
     "composite": true,
     "strict": true,
