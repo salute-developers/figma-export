@@ -1,0 +1,13 @@
+{
+  "name": "parserNew",
+  "id": "000000000000000000",
+  "api": "1.0.0",
+  "main": "dist/main.js",
+  "ui": "dist/ui.html",
+  "documentAccess": "dynamic-page",
+  "editorType": ["figma", "dev"],
+  "capabilities": ["inspect"],
+  "networkAccess": {
+    "allowedDomains": ["https://api.github.com"]
+  }
+}

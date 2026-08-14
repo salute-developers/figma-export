@@ -1,64 +1,26 @@
-## Plasma Icon Exporter plugin for Figma
+# Figma parsers
 
-This plugin can export selected icon from figma layouts.
+Монорепозиторий содержит два независимых Figma-плагина:
 
-### Install
+- [`packages/parserOld`](./packages/parserOld) — старый плагин экспорта иконок в GitHub/Plasma. Код перенесён без изменения продуктовой логики.
+- [`packages/parserNew`](./packages/parserNew) — новый независимый парсер библиотек иконок. Рекурсивно находит компоненты в выделении или на текущей странице, экспортирует SVG и формирует JSON с категорией, группой, размером и вариантом.
+
+## Команды
 
 ```sh
 npm ci
 npm run build
+npm test
 ```
 
-### Условия для загрузки plugins
+Сборка одного пакета:
 
--   у учетной записи включена возможность `dev mode`;
--   установлена приложение `Figma` (MacOS, Windows);
-
-### Import plugin to figma
-
-1. Выбираем в верхнем меню: `Plugins` -> `Development` -> `Import plugin from manifest`.
-2. После плагин доступен в приложении
-
-### Использование
-
--   выбираем иконку или группу иконок и запускаем плагин
--   появиться UI плагина в котором можно будет указать название commit и заголовок для pull request (так же будет информация о кол-ве svg иконок)
-
-### Как использовать token (PAT)?
-
-Для корректной работы плагина нужен github token - [Creating a fine grained personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
-
-В файле `useGithubAuth.ts` укажите полученный вами токен.
-
-```ts
-const [token, setToken] = useState<string | undefined>('PAT');
+```sh
+npm run build:parserOld
+npm run build:parserNew
 ```
 
-#### Обход ограничение github rate limit
+После сборки импортируйте нужный manifest через Figma Desktop:
 
-К сожалению за раз обработать более 600 иконок нельзя - есть ограничения.
-
-Поэтому можно в "ручном" режиме добавлять commit к созданной ветке.
-
--   создаем pull request с первым набором иконок через плагин
--   убедились что ветка и pull request созданы
--   в файле `useRunGithubPRProcess.ts` выключаем шаги: 0, 6, 7
--   в файле `App.tsx` меняем `branchName` на созданную вами ветку, например - `icon-export-63qgo1r6vg8`
-
-```tsx
-const [step, createPullRequest] = useRunGithubPRProcess({
-    branchName: `icon-export-${getSalt()}`, //"<-- icon-export-63qgo1r6vg8"
-});
-```
-
--   в файле `githubFilesFetcher.ts` меняем в методе `getFilesSource` значение для `ref`
-
-```ts
-const result = await octokit.rest.repos.getContent({
-    ref: 'dev', // <-- branchName (icon-export-63qgo1r6vg8)
-});
-```
-
-Этот "трюк" позволит создавать новые commits и добавлять их к **уже** **созданной** ветке/pull request.
-
-Примечание: В корне проекта должен быть запущен webpack — `npm run watch`.
+- `packages/parserOld/manifest.json`
+- `packages/parserNew/manifest.json`

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "outDir": ".test-build",
+    "declaration": false,
+    "noUnusedLocals": false,
+    "types": []
+  },
+  "include": ["./src/parser.ts", "./src/githubPayload.ts", "./src/github.ts"]
+}

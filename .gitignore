@@ -15,6 +15,7 @@
 node_modules/
 npm-debug.log
 dist/
+.test-build/
 *.tsbuildinfo
 
 build-sb
