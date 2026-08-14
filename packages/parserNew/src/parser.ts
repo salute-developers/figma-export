@@ -21,6 +21,20 @@ const VARIANT_SUFFIXES: Array<{ suffix: string; variant: IconVariant }> = [
 
 const compact = (value: string) => value.replace(/[\s/_-]+/g, '').toLocaleLowerCase();
 
+export const getIconSearchKey = (value: string) => value.replace(/\s+/g, '').toLocaleLowerCase();
+
+export const parseIconSearchQuery = (value: string): string[] => {
+    const uniqueNames = new Map<string, string>();
+
+    value.split(',').forEach((part) => {
+        const name = part.trim();
+        const key = getIconSearchKey(name);
+        if (key && !uniqueNames.has(key)) uniqueNames.set(key, name);
+    });
+
+    return Array.from(uniqueNames.values());
+};
+
 const toPascalCase = (value: string) =>
     value
         .trim()

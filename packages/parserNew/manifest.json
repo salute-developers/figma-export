@@ -8,6 +8,6 @@
   "editorType": ["figma", "dev"],
   "capabilities": ["inspect"],
   "networkAccess": {
-    "allowedDomains": ["none"]
+    "allowedDomains": ["https://api.github.com"]
   }
 }
