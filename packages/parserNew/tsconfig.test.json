@@ -7,5 +7,5 @@
     "noUnusedLocals": false,
     "types": []
   },
-  "include": ["./src/parser.ts", "./src/githubPayload.ts", "./src/github.ts"]
+  "include": ["./src/parser.ts", "./src/githubPayload.ts", "./src/github.ts", "./src/svgMetadata.ts"]
 }
