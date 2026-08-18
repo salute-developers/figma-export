@@ -1,4 +1,5 @@
 import { classifyIcon, getIconSearchKey, parseIconName, parseIconSearchQuery } from '../parser';
+import { addComponentInformationMetadata, parseComponentInformation } from '../svgMetadata';
 import type { AncestorDescriptor } from '../parser';
 import type { IconMetadata, IconSourceInfo, ParseIssue, PluginMessage, UIMessage } from '../types';
 
@@ -98,6 +99,18 @@ const getComponentKey = (node: IconNode): string | undefined => {
     return node.mainComponent && node.mainComponent.key ? node.mainComponent.key : undefined;
 };
 
+const getComponentInformation = (node: IconNode) => {
+    const component = node.type === 'COMPONENT' ? node : node.mainComponent;
+    if (!component) return {};
+
+    const componentSet = component.parent && component.parent.type === 'COMPONENT_SET'
+        ? component.parent
+        : null;
+    const description = component.description.trim() || (componentSet ? componentSet.description.trim() : '');
+
+    return parseComponentInformation(description);
+};
+
 const exportIcon = async (node: IconNode): Promise<IconMetadata> => {
     const originalName = node.name;
     const size = Math.round(node.width);
@@ -115,7 +128,7 @@ const exportIcon = async (node: IconNode): Promise<IconMetadata> => {
         category: classification.category,
         group: classification.group,
         page: getPageName(node),
-        svg: bytesToString(svgBytes),
+        svg: addComponentInformationMetadata(bytesToString(svgBytes), getComponentInformation(node)),
     };
 };
 

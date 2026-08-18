@@ -4,6 +4,7 @@ const test = require('node:test');
 const { classifyIcon, getIconSearchKey, parseIconName, parseIconSearchQuery } = require('../.test-build/parser');
 const { buildPullRequestFiles } = require('../.test-build/githubPayload');
 const { createIconsPullRequest } = require('../.test-build/github');
+const { addComponentInformationMetadata, parseComponentInformation } = require('../.test-build/svgMetadata');
 
 test('parses variants used by the reference icon library', () => {
     assert.deepEqual(parseIconName('ArrowDown'), { name: 'ArrowDown', variant: 'regular' });
@@ -89,6 +90,53 @@ test('builds one PR file map for the complete icon list and preserves variants',
     assert.equal(files['packages/sdds-icons/svg/16/ArrowDown.svg'], '<svg id="regular"/>');
     assert.equal(files['packages/sdds-icons/svg/16/ArrowDownBold.svg'], '<svg id="bold"/>');
     assert.equal(Object.keys(files).length, 2);
+});
+
+test('parses structured fields from Figma Component information', () => {
+    assert.deepEqual(
+        parseComponentInformation(
+            'aliases: arrows, navigation, movement, стрелки, arrows; source category: Arrows & Movement; source: 16 / Arrows / ArrowDown; size: 16',
+        ),
+        {
+            aliases: ['arrows', 'navigation', 'movement', 'стрелки'],
+            sourceCategory: 'Arrows & Movement',
+            source: '16 / Arrows / ArrowDown',
+            size: 16,
+        },
+    );
+});
+
+test('parses Component information with line breaks in field names', () => {
+    assert.deepEqual(
+        parseComponentInformation(
+            'aliases: arrows, navigation; source\ncategory: Navigation, Movement;\nsubcategory: Arrows; fallback: 16 / Arrows / ArrowDown;\nsize: 16',
+        ),
+        {
+            aliases: ['arrows', 'navigation'],
+            sourceCategory: 'Navigation, Movement',
+            size: 16,
+        },
+    );
+});
+
+test('adds parsed Figma Component information as valid SVG metadata', () => {
+    const svg = addComponentInformationMetadata('<svg viewBox="0 0 16 16"><path d="M0 0"/></svg>', {
+        aliases: ['navigation', 'movement'],
+        sourceCategory: 'Arrows & Movement',
+        source: '16 / Arrows / ArrowDown',
+        size: 16,
+    });
+
+    assert.match(svg, /^<svg viewBox="0 0 16 16">\n<metadata>/);
+    assert.match(svg, /"aliases":\["navigation","movement"\]/);
+    assert.match(svg, /"sourceCategory":"Arrows &amp; Movement"/);
+    assert.match(svg, /"source":"16 \/ Arrows \/ ArrowDown"/);
+    assert.match(svg, /"size":16/);
+});
+
+test('does not add SVG metadata when Component information is empty', () => {
+    const svg = '<svg><path/></svg>';
+    assert.equal(addComponentInformationMetadata(svg, parseComponentInformation('')), svg);
 });
 
 test('rebuilds a commit on the latest PR head after a non-fast-forward response', async () => {
