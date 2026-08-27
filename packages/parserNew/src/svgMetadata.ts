@@ -1,9 +1,54 @@
 export interface ComponentInformationMetadata {
     aliases?: string[];
-    sourceCategory?: string;
+    category?: string;
     source?: string;
-    size?: number;
+    size?: string;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const normalizeString = (value: unknown): string | undefined => {
+    if (typeof value !== 'string' && typeof value !== 'number') return undefined;
+
+    const normalized = String(value).trim();
+    return normalized || undefined;
+};
+
+const normalizeAliases = (value: unknown): string[] => {
+    const aliases = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
+
+    return Array.from(
+        new Set(
+            aliases
+                .map((alias) => normalizeString(alias))
+                .filter((alias): alias is string => Boolean(alias)),
+        ),
+    );
+};
+
+const toMetadata = (value: Record<string, unknown>): ComponentInformationMetadata => {
+    const aliases = normalizeAliases(value.aliases);
+    const category = normalizeString(value.category);
+    const source = normalizeString(value.source);
+    const size = normalizeString(value.size);
+
+    return {
+        ...(aliases.length > 0 ? { aliases } : {}),
+        ...(category ? { category } : {}),
+        ...(source ? { source } : {}),
+        ...(size ? { size } : {}),
+    };
+};
+
+const parseJsonMetadata = (description: string): ComponentInformationMetadata | null => {
+    try {
+        const parsed: unknown = JSON.parse(description);
+        return isRecord(parsed) ? toMetadata(parsed) : {};
+    } catch (_error) {
+        return null;
+    }
+};
 
 const escapeXmlText = (value: string) =>
     value
@@ -12,9 +57,15 @@ const escapeXmlText = (value: string) =>
         .replace(/>/g, '&gt;');
 
 export const parseComponentInformation = (description: string): ComponentInformationMetadata => {
+    const trimmedDescription = description.trim();
+    if (!trimmedDescription) return {};
+
+    const jsonMetadata = parseJsonMetadata(trimmedDescription);
+    if (jsonMetadata) return jsonMetadata;
+
     const fields = new Map<string, string>();
 
-    description
+    trimmedDescription
         .replace(/\s+/g, ' ')
         .split(';')
         .forEach((part) => {
@@ -26,25 +77,12 @@ export const parseComponentInformation = (description: string): ComponentInforma
             if (key && value) fields.set(key, value);
         });
 
-    const aliases = Array.from(
-        new Set(
-            (fields.get('aliases') || '')
-                .split(',')
-                .map((alias) => alias.trim())
-                .filter(Boolean),
-        ),
-    );
-    const sourceCategory = fields.get('source category');
-    const source = fields.get('source');
-    const rawSize = fields.get('size');
-    const parsedSize = rawSize === undefined ? undefined : Number(rawSize);
-
-    return {
-        ...(aliases.length > 0 ? { aliases } : {}),
-        ...(sourceCategory ? { sourceCategory } : {}),
-        ...(source ? { source } : {}),
-        ...(parsedSize !== undefined && Number.isFinite(parsedSize) ? { size: parsedSize } : {}),
-    };
+    return toMetadata({
+        aliases: fields.get('aliases'),
+        category: fields.get('category') || fields.get('source category'),
+        source: fields.get('source'),
+        size: fields.get('size'),
+    });
 };
 
 export const addComponentInformationMetadata = (
